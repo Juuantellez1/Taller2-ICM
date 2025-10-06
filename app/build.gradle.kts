@@ -5,7 +5,6 @@ plugins {
 
 android {
     namespace = "com.example.myapplication"
-    defaultConfig { applicationId = "com.example.myapplication" }
     compileSdk = 34
 
     defaultConfig {
@@ -27,9 +26,8 @@ android {
         }
     }
 
-    // Usamos XML + ViewBinding (NO Compose)
     buildFeatures {
-        viewBinding = true
+        viewBinding = true      // XML + ViewBinding
         compose = false
     }
 
