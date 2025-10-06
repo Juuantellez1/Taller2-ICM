@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="google_maps_key">AIzaSyBTyjZn6h9IvQTK9X8Z3pJlxdnSyNP807U</string>
+    <string name="contacts">Contactos</string>
+    <string name="photos">Fotos</string>
+    <string name="map">Mapa</string>
+    <string name="photo">Foto</string>
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
+</resources>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF6FAFF"
+    tools:context=".MainActivity">
+
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:orientation="vertical"
+android:gravity="center"
+android:paddingTop="40dp"
+android:paddingBottom="40dp"
+android:background="#FFF6FAFF">
+
+<!-- Botón 1: Contactos -->
+    <ImageButton
+        android:id="@+id/btnContacts"
+        android:layout_width="183dp"
+        android:layout_height="165dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:adjustViewBounds="true"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/contacts"
+        android:scaleType="fitCenter"
+        android:src="@drawable/contacts" />
+
+<!-- Botón 2: Cámara / Galería -->
+    <ImageButton
+        android:id="@+id/btnPhoto"
+        android:layout_width="182dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:adjustViewBounds="true"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/photos"
+        android:scaleType="fitCenter"
+        android:src="@drawable/camera" />
+
+<!-- Botón 3: Mapa -->
+    <ImageButton
+        android:id="@+id/btnMap"
+        android:layout_width="179dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:adjustViewBounds="true"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/map"
+        android:scaleType="fitCenter"
+        android:src="@drawable/osmap" />
+
+</LinearLayout>
+    </ScrollView>
