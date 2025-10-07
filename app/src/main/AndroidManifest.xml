@@ -28,7 +28,7 @@
             android:value="@string/google_maps_key" />
 
 
-        <!-- Activities (Android 12+ exige exported) -->
+        <!-- Activities (Android 12) -->
         <activity
             android:name=".MapsActivity"
             android:exported="false" />
