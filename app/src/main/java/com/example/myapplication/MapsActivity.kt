@@ -94,7 +94,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
-        // Búsqueda por texto - CORREGIDO
+        // Búsqueda por texto
         b.etQuery.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
                 val q = v.text.toString().trim()
@@ -140,7 +140,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         map = gm
         gm.uiSettings.isZoomControlsEnabled = true
 
-        // Long press -> pin + distancia - CORREGIDO
+        // Long press -> pin + distancia
         gm.setOnMapLongClickListener { latLng ->
             Log.d(TAG, "Long click en: $latLng")
             val addr = reverseGeocode(latLng)
@@ -233,7 +233,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         }
     }
 
-    // Geocoder desde texto - CORREGIDO
+    // Geocoder desde texto
     private fun geocodeAndPin(text: String) {
         Log.d(TAG, "Buscando: $text")
         try {
@@ -271,7 +271,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         }
     }
 
-    // Geocoder inverso para long-click - CORREGIDO
+    // Geocoder inverso para long-click
     private fun reverseGeocode(ll: LatLng): String {
         return try {
             val gc = Geocoder(this, Locale.getDefault())
@@ -292,7 +292,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(ll, zoom))
     }
 
-    // Mostrar distancia - CORREGIDO
+    // Mostrar distancia
     private fun showDistanceToast() {
         val me = lastLocation
         val pin = pinMarker?.position
