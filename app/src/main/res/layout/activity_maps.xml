@@ -10,15 +10,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- El buscador flotando arriba -->
-    <EditText
-        android:id="@+id/etQuery"
+    <!-- Contenedor de búsqueda flotante -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:layout_margin="12dp"
-        android:padding="12dp"
-        android:background="@android:drawable/edit_text"
-        android:hint="Buscar dirección…"
-        android:imeOptions="actionSearch" />
+        android:orientation="horizontal"
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        android:padding="4dp">
+
+        <EditText
+            android:id="@+id/etQuery"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:padding="12dp"
+            android:background="@android:color/transparent"
+            android:hint="Buscar dirección…"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <ImageButton
+            android:id="@+id/btnSearch"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_search"
+            android:contentDescription="Buscar" />
+    </LinearLayout>
 </FrameLayout>

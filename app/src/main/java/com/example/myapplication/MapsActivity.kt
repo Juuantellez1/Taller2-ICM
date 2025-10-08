@@ -11,7 +11,9 @@ import android.hardware.SensorManager
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -49,6 +51,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
     // Sensor de luz
     private lateinit var sensorManager: SensorManager
     private var lightSensor: Sensor? = null
+
+    private val TAG = "MapsActivity"
 
     // Lanzador moderno para resolver ajustes de ubicación
     private val resolutionLauncher =
@@ -90,13 +94,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
-        // Búsqueda por texto
+        // Búsqueda por texto - CORREGIDO
         b.etQuery.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
                 val q = v.text.toString().trim()
-                if (q.isNotEmpty()) geocodeAndPin(q)
+                if (q.isNotEmpty()) {
+                    geocodeAndPin(q)
+                    // Ocultar teclado
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.windowToken, 0)
+                } else {
+                    Toast.makeText(this, "Ingresa una dirección", Toast.LENGTH_SHORT).show()
+                }
                 true
             } else false
+        }
+
+        // Botón de búsqueda adicional
+        b.btnSearch.setOnClickListener {
+            val q = b.etQuery.text.toString().trim()
+            if (q.isNotEmpty()) {
+                geocodeAndPin(q)
+                // Ocultar teclado
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(b.etQuery.windowToken, 0)
+            } else {
+                Toast.makeText(this, "Ingresa una dirección", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -116,11 +140,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         map = gm
         gm.uiSettings.isZoomControlsEnabled = true
 
-        // Long press -> pin + distancia
+        // Long press -> pin + distancia - CORREGIDO
         gm.setOnMapLongClickListener { latLng ->
+            Log.d(TAG, "Long click en: $latLng")
             val addr = reverseGeocode(latLng)
             pinMarker?.remove()
-            pinMarker = gm.addMarker(MarkerOptions().position(latLng).title(addr))
+            pinMarker = gm.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .title(addr)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            )
+            pinMarker?.showInfoWindow()
             moveCamera(latLng, 15f)
             showDistanceToast()
         }
@@ -169,6 +200,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
                 lastLocation = loc
                 val ll = LatLng(loc.latitude, loc.longitude)
 
+                Log.d(TAG, "Ubicación actualizada: $ll")
+
                 if (myMarker == null) {
                     myMarker = m.addMarker(
                         MarkerOptions().position(ll).title("Aquí estoy")
@@ -195,36 +228,62 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
                 put("accuracy", loc.accuracy)
             })
             jsonFile.writeText(arr.toString())
-        } catch (_: Exception) { /* no-op */ }
-    }
-
-    // Geocoder desde texto
-    private fun geocodeAndPin(text: String) {
-        try {
-            val gc = Geocoder(this, Locale.getDefault())
-            val res = gc.getFromLocationName(text, 1)
-            if (!res.isNullOrEmpty()) {
-                val a = res[0]
-                val ll = LatLng(a.latitude, a.longitude)
-                pinMarker?.remove()
-                pinMarker = map?.addMarker(MarkerOptions().position(ll).title(a.getAddressLine(0)))
-                moveCamera(ll, 16f)
-                showDistanceToast()
-            } else {
-                Toast.makeText(this, "No se encontró la dirección", Toast.LENGTH_SHORT).show()
-            }
-        } catch (_: Exception) {
-            Toast.makeText(this, "Error de geocodificación", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error guardando ubicación en JSON", e)
         }
     }
 
-    // Geocoder inverso para long-click
+    // Geocoder desde texto - CORREGIDO
+    private fun geocodeAndPin(text: String) {
+        Log.d(TAG, "Buscando: $text")
+        try {
+            val gc = Geocoder(this, Locale.getDefault())
+
+            @Suppress("DEPRECATION")
+            val res = gc.getFromLocationName(text, 1)
+
+            if (!res.isNullOrEmpty()) {
+                val a = res[0]
+                val ll = LatLng(a.latitude, a.longitude)
+                val address = a.getAddressLine(0) ?: "Dirección encontrada"
+
+                Log.d(TAG, "Encontrado: $address en $ll")
+
+                pinMarker?.remove()
+                pinMarker = map?.addMarker(
+                    MarkerOptions()
+                        .position(ll)
+                        .title(address)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                )
+                pinMarker?.showInfoWindow()
+                moveCamera(ll, 16f)
+                showDistanceToast()
+
+                Toast.makeText(this, "Ubicación encontrada", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "No se encontró la dirección '$text'", Toast.LENGTH_LONG).show()
+                Log.w(TAG, "Sin resultados para: $text")
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error de geocodificación: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "Error en geocodeAndPin", e)
+        }
+    }
+
+    // Geocoder inverso para long-click - CORREGIDO
     private fun reverseGeocode(ll: LatLng): String {
         return try {
             val gc = Geocoder(this, Locale.getDefault())
+
+            @Suppress("DEPRECATION")
             val res = gc.getFromLocation(ll.latitude, ll.longitude, 1)
-            res?.firstOrNull()?.getAddressLine(0) ?: "${ll.latitude}, ${ll.longitude}"
-        } catch (_: Exception) {
+
+            val address = res?.firstOrNull()?.getAddressLine(0) ?: "${ll.latitude}, ${ll.longitude}"
+            Log.d(TAG, "Geocodificación inversa: $address")
+            address
+        } catch (e: Exception) {
+            Log.e(TAG, "Error en reverseGeocode", e)
             "${ll.latitude}, ${ll.longitude}"
         }
     }
@@ -233,21 +292,48 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListene
         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(ll, zoom))
     }
 
+    // Mostrar distancia - CORREGIDO
     private fun showDistanceToast() {
-        val me = lastLocation ?: return
-        val pin = pinMarker?.position ?: return
+        val me = lastLocation
+        val pin = pinMarker?.position
+
+        if (me == null) {
+            Toast.makeText(this, "Esperando ubicación GPS...", Toast.LENGTH_SHORT).show()
+            Log.w(TAG, "lastLocation es null")
+            return
+        }
+
+        if (pin == null) {
+            Log.w(TAG, "pinMarker es null")
+            return
+        }
+
         val results = FloatArray(1)
         Location.distanceBetween(me.latitude, me.longitude, pin.latitude, pin.longitude, results)
-        Toast.makeText(this, "Distancia a marcador: %.2f km".format(results[0] / 1000.0), Toast.LENGTH_LONG).show()
+        val distanceKm = results[0] / 1000.0
+
+        val message = if (distanceKm < 1.0) {
+            "Distancia: %.0f metros".format(results[0])
+        } else {
+            "Distancia: %.2f km".format(distanceKm)
+        }
+
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        Log.d(TAG, "Distancia calculada: $distanceKm km")
     }
 
     // Sensor de luz → estilo claro/oscuro
     override fun onSensorChanged(e: SensorEvent?) {
         val lux = e?.values?.firstOrNull() ?: return
+        Log.d(TAG, "Luminosidad: $lux lux")
+
         val style = if (lux < 20f) R.raw.map_night else R.raw.map_light
         try {
             map?.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, style))
-        } catch (_: Exception) { /* ignora errores de estilo */ }
+        } catch (ex: Exception) {
+            Log.e(TAG, "Error aplicando estilo de mapa", ex)
+        }
     }
+
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
